@@ -1,7 +1,7 @@
 {
   "name": "event-monitor",
   "type": "module",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "description": "Event monitoring tool",
   "main": "index.js",
   "scripts": {
