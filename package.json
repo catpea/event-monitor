@@ -1,0 +1,24 @@
+{
+  "name": "event-monitor",
+  "type": "module",
+  "version": "1.2.13",
+  "description": "Event monitoring tool",
+  "main": "index.js",
+  "scripts": {
+    "ff": "web-ext run --source-dir ./src/",
+    "save": "git add .; git commit -m 'Updated Release'; npm version patch; npm publish; git push --follow-tags;"
+  },
+  "keywords": [
+    "events"
+  ],
+  "author": "@catpea",
+  "license": "GPL",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/catpea/event-monitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/catpea/event-monitor/issues"
+  },
+  "homepage": "https://github.com/catpea/event-monitor#readme"
+}

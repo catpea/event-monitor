@@ -1,0 +1,14 @@
+/* Your add-on panel CSS */
+:root {
+  /* You can set defaults here if you want */
+}
+
+body {
+  background: var(--theme-body-background);
+  color: var(--theme-body-color);
+}
+
+.button {
+  background: var(--theme-toolbar-background);
+  color: var(--theme-toolbar-color);
+}
