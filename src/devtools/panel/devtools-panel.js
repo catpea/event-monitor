@@ -1,3 +1,19 @@
+browser.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "devtools-app-event") {
+    // Do something with msg.payload (the event data)
+    document.body.innerHTML += `<pre>${JSON.stringify(msg.payload, null, 2)}</pre>`;
+  }
+});
+// browser.runtime.onMessage.addListener((msg) => {
+//   if (msg.type === "app-event") {
+//     // Do something with msg.payload (the event data)
+//     document.body.innerHTML += `<pre>2${JSON.stringify(msg.payload, null, 2)}</pre>`;
+//   }
+// });
+
+
+
+
 /**
 Handle errors from the injected script.
 Errors may come from evaluating the JavaScript itself
@@ -21,6 +37,13 @@ function handleResult(result) {
     handleError(result[1]);
   }
 }
+
+
+
+
+
+
+
 
 /**
 Handle the result of evaluating the jQuery test script.
