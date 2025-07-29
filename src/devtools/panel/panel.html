@@ -1,27 +1,222 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Event Monitor</title>
-    <script src="/chrome/theme-switching.js"></script>
-    <link href="/chrome/css/bootstrap.min.css" rel="stylesheet" />
-  </head>
-  <body>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col p-3">
-          <button class="btn btn-sm btn-secondary" id="button_h1">Inspect h1</button>
-          <button class="btn btn-sm btn-secondary" id="button_background">Reddinate inspected element</button>
-          <button class="btn btn-sm btn-secondary" id="button_jquery">Check for jquery</button>
-          <button class="btn btn-sm btn-secondary" id="button_message">Inject content script</button>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline SVG Visualization</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .timeline-container {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        svg {
+            display: block;
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .event-rect {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .event-rect:hover {
+            opacity: 0.8;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .stats {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .stats h3 {
+            margin-top: 0;
+            color: #4a9eff;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+        }
+
+        select {
+            background: #3a3a3a;
+            color: white;
+            border: 1px solid #4a4a4a;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .time-ruler {
+            fill: #666;
+            font-size: 11px;
+        }
+
+        .grid-line {
+            stroke: #333;
+            stroke-width: 1;
+            stroke-dasharray: 2,2;
+        }
+
+        .swim-lane {
+            fill: rgba(255, 255, 255, 0.02);
+            stroke: #333;
+            stroke-width: 1;
+        }
+
+        .event-label {
+            fill: white;
+            font-size: 11px;
+            pointer-events: none;
+        }
+
+        .duration-line {
+            stroke: rgba(255, 255, 255, 0.3);
+            stroke-width: 1;
+            stroke-dasharray: 3,2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Timeline Event Visualization</h1>
+
+        <div class="controls">
+            <button id="btnRandom">Generate Random Events</button>
+            <button id="btnNetwork">Network Scenario</button>
+            <button id="btnUser">User Interaction Scenario</button>
+            <button id="btnClear">Clear Timeline</button>
+            <select id="viewMode">
+                <option value="swimlane">Swimlane View</option>
+                <option value="compact">Compact View</option>
+                <option value="duration">Duration Focus</option>
+            </select>
+            <select id="timeScale">
+                <option value="1">1x Scale</option>
+                <option value="2">2x Scale</option>
+                <option value="0.5">0.5x Scale</option>
+            </select>
         </div>
-        <div class="col">Column</div>
-        <div class="col">Column</div>
-      </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4a9eff;"></div>
+                <span>Network</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #52c41a;"></div>
+                <span>Render</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff7875;"></div>
+                <span>Script</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #faad14;"></div>
+                <span>User</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #b37feb;"></div>
+                <span>System</span>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <svg id="timeline" width="1100" height="400"></svg>
+        </div>
+
+        <div class="stats">
+            <h3>Timeline Statistics</h3>
+            <div id="statsContent">No events yet</div>
+        </div>
     </div>
 
-    <script src="/chrome/js/bootstrap.bundle.min.js"></script>
-    <script src="devtools-panel.js"></script>
-  </body>
+    <div class="tooltip" id="tooltip"></div>
+
+    <script type="module" src="./test-module.js"></script>
+
+    </script>
+</body>
 </html>
